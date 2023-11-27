@@ -28,3 +28,9 @@ from .dbus_change_staging_code_requested import DbusChangeStagingCodeRequested
 from .dbus_staged_changes_commit_code_requested import (
     DbusStagedChangesCommitCodeRequested,
 )
+from .dbus_change_staging_code_execution_packaged import (
+    DbusChangeStagingCodeExecutionPackaged,
+)
+from .dbus_change_staging_code_execution_described import (
+    DbusChangeStagingCodeExecutionDescribed,
+)
