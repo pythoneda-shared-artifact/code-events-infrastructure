@@ -31,6 +31,6 @@ from .dbus_staged_changes_commit_code_requested import (
 from .dbus_change_staging_code_execution_packaged import (
     DbusChangeStagingCodeExecutionPackaged,
 )
-from .dbus_change_staging_code_execution_described import (
-    DbusChangeStagingCodeExecutionDescribed,
+from .dbus_change_staging_code_execution_requested import (
+    DbusChangeStagingCodeExecutionRequested,
 )
