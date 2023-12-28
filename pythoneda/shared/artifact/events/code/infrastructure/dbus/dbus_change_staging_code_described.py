@@ -68,7 +68,7 @@ class DbusChangeStagingCodeDescribed(BaseObject, ServiceInterface):
         return DBUS_PATH
 
     @classmethod
-    def transform(self, event: ChangeStagingCodeDescribed) -> List[str]:
+    def transform(cls, event: ChangeStagingCodeDescribed) -> List[str]:
         """
         Transforms given event to signal parameters.
         :param event: The event to transform.
