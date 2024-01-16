@@ -1,3 +1,4 @@
+# vim: set fileencoding=utf-8
 """
 pythoneda/shared/artifact/events/code/__init__.py
 

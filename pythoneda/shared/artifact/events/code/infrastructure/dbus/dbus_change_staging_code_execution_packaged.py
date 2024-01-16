@@ -1,3 +1,4 @@
+# vim: set fileencoding=utf-8
 """
 pythoneda/shared/artifact/events/code/infrastructure/dbus/dbus_change_staging_code_execution_packaged.py
 
@@ -21,10 +22,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 from dbus_next import Message
 from dbus_next.service import ServiceInterface, signal
 import json
-from pythoneda import BaseObject
-from pythoneda.shared.code_requests.jupyterlab import JupyterlabCodeRequestNixFlake
+from pythoneda.shared import BaseObject
 from pythoneda.shared.artifact.events.code import ChangeStagingCodeExecutionPackaged
 from pythoneda.shared.artifact.events.code.infrastructure.dbus import DBUS_PATH
+from pythoneda.shared.code_requests.jupyterlab import JupyterlabCodeRequestNixFlake
 from typing import List
 
 
