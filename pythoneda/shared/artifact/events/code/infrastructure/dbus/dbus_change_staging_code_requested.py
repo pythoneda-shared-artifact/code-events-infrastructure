@@ -102,3 +102,11 @@ class DbusChangeStagingCodeRequested(BaseObject, ServiceInterface):
         return ChangeStagingCodeRequested(
             Change.from_json(change_json), None, event_id, json.loads(prev_event_ids)
         )
+# vim: syntax=python ts=4 sw=4 sts=4 tw=79 sr et
+# Local Variables:
+# mode: python
+# python-indent-offset: 4
+# tab-width: 4
+# indent-tabs-mode: nil
+# fill-column: 79
+# End:
