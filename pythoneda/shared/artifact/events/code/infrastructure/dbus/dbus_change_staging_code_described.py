@@ -79,8 +79,8 @@ class DbusChangeStagingCodeDescribed(BaseObject, ServiceInterface):
         """
         return [
             event.code_request.to_json(),
-            event.id,
             json.dumps(event.previous_event_ids),
+            event.id,
         ]
 
     @classmethod
@@ -103,13 +103,14 @@ class DbusChangeStagingCodeDescribed(BaseObject, ServiceInterface):
         :return: The ChangeStagingDescribed event.
         :rtype: pythoneda.shared.artifact.events.code.ChangeStagingCodeDescribed
         """
-        code_request_json, event_id, prev_event_ids = message.body
+        code_request_json, prev_event_ids, event_id = message.body
         return ChangeStagingCodeDescribed(
             JupyterlabCodeRequest.from_json(code_request_json),
-            None,
-            event_id,
             json.loads(prev_event_ids),
+            event_id,
         )
+
+
 # vim: syntax=python ts=4 sw=4 sts=4 tw=79 sr et
 # Local Variables:
 # mode: python

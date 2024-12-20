@@ -81,8 +81,8 @@ class DbusStagedChangesCommitCodeRequested(BaseObject, ServiceInterface):
             event.repository_url,
             event.branch,
             event.repository_folder,
-            event.id,
             json.dumps(event.previous_event_ids),
+            event.id,
         ]
 
     @classmethod
@@ -110,18 +110,19 @@ class DbusStagedChangesCommitCodeRequested(BaseObject, ServiceInterface):
             repository_url,
             branch,
             repository_folder,
-            event_id,
             prev_event_ids,
+            event_id,
         ) = message.body
         return StagedChangesCommitCodeRequested(
             msg,
             repository_url,
             branch,
             repository_folder,
-            None,
-            event_id,
             json.loads(prev_event_ids),
+            event_id,
         )
+
+
 # vim: syntax=python ts=4 sw=4 sts=4 tw=79 sr et
 # Local Variables:
 # mode: python

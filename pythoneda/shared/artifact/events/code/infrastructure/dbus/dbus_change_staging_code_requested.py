@@ -76,7 +76,7 @@ class DbusChangeStagingCodeRequested(BaseObject, ServiceInterface):
         :return: The event information.
         :rtype: List[str]
         """
-        return [str(event.change), event.id, json.dumps(event.previous_event_ids)]
+        return [str(event.change), json.dumps(event.previous_event_ids), event.id]
 
     @classmethod
     def sign(cls, event: ChangeStagingCodeRequested) -> str:
@@ -98,10 +98,12 @@ class DbusChangeStagingCodeRequested(BaseObject, ServiceInterface):
         :return: The ChangeStagingCodeRequested event.
         :rtype: pythoneda.shared.artifact.events.code.ChangeStagingCodeRequested
         """
-        change_json, event_id, prev_event_ids = message.body
+        change_json, prev_event_ids, event_id = message.body
         return ChangeStagingCodeRequested(
-            Change.from_json(change_json), None, event_id, json.loads(prev_event_ids)
+            Change.from_json(change_json), json.loads(prev_event_ids), event_id
         )
+
+
 # vim: syntax=python ts=4 sw=4 sts=4 tw=79 sr et
 # Local Variables:
 # mode: python

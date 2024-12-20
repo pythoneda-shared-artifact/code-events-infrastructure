@@ -79,8 +79,8 @@ class DbusChangeStagingCodePackaged(BaseObject, ServiceInterface):
         """
         return [
             event.nix_flake.to_json(),
-            event.id,
             json.dumps(event.previous_event_ids),
+            event.id,
         ]
 
     @classmethod
@@ -103,13 +103,14 @@ class DbusChangeStagingCodePackaged(BaseObject, ServiceInterface):
         :return: The ChangeStagingPackaged event.
         :rtype: pythoneda.shared.artifact.events.code.ChangeStagingCodePackaged
         """
-        nix_flake_json, event_id, prev_event_ids = message.body
+        nix_flake_json, prev_event_ids, event_id = message.body
         return ChangeStagingCodePackaged(
             JupyterlabCodeRequestNixFlake.from_json(nix_flake_json),
-            None,
-            event_id,
             json.loads(prev_event_ids),
+            event_id,
         )
+
+
 # vim: syntax=python ts=4 sw=4 sts=4 tw=79 sr et
 # Local Variables:
 # mode: python
