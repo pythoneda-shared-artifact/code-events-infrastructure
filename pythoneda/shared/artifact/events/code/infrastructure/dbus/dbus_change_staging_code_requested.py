@@ -22,7 +22,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 from dbus_next import Message
 from dbus_next.service import signal
 import json
-from pythoneda.shared import Event
+from pythoneda.shared import Event, Invariants
 from pythoneda.shared.infrastructure.dbus import DbusEvent
 from pythoneda.shared.artifact.events.code import ChangeStagingCodeRequested
 from pythoneda.shared.artifact.events.code.infrastructure.dbus import DBUS_PATH
@@ -46,9 +46,17 @@ class DbusChangeStagingCodeRequested(DbusEvent):
         """
         Creates a new DbusChangeStagingCodeRequested.
         """
-        super().__init__(
-            "Pythoneda_Shared_Artifact_Events_Code_ChangeStagingCodeRequested"
-        )
+        super().__init__(DBUS_PATH)
+
+    @classmethod
+    @property
+    def name(cls) -> str:
+        """
+        Retrieves the d-bus interface name.
+        :return: Such value.
+        :rtype: str
+        """
+        return "Pythoneda_Shared_Artifact_Events_Code_ChangeStagingCodeRequested"
 
     @signal()
     def ChangeStagingCodeRequested(self, change: "s"):
@@ -60,15 +68,6 @@ class DbusChangeStagingCodeRequested(DbusEvent):
         pass
 
     @classmethod
-    def path(cls) -> str:
-        """
-        Retrieves the d-bus path.
-        :return: Such value.
-        :rtype: str
-        """
-        return DBUS_PATH
-
-    @classmethod
     def transform(cls, event: ChangeStagingCodeRequested) -> List[str]:
         """
         Transforms given event to signal parameters.
@@ -77,7 +76,12 @@ class DbusChangeStagingCodeRequested(DbusEvent):
         :return: The event information.
         :rtype: List[str]
         """
-        return [str(event.change), json.dumps(event.previous_event_ids), event.id]
+        return [
+            str(event.change),
+            json.dumps(event.previous_event_ids),
+            Invariants.instance().to_json(event),
+            event.id,
+        ]
 
     @classmethod
     def sign(cls, event: ChangeStagingCodeRequested) -> str:
@@ -88,7 +92,7 @@ class DbusChangeStagingCodeRequested(DbusEvent):
         :return: The signature.
         :rtype: str
         """
-        return "sss"
+        return "ssss"
 
     @classmethod
     def parse(cls, message: Message) -> ChangeStagingCodeRequested:
@@ -99,9 +103,12 @@ class DbusChangeStagingCodeRequested(DbusEvent):
         :return: The ChangeStagingCodeRequested event.
         :rtype: pythoneda.shared.artifact.events.code.ChangeStagingCodeRequested
         """
-        change_json, prev_event_ids, event_id = message.body
-        return ChangeStagingCodeRequested(
-            Change.from_json(change_json), json.loads(prev_event_ids), event_id
+        change_json, prev_event_ids, invariants, event_id = message.body
+        return (
+            invariants,
+            ChangeStagingCodeRequested(
+                Change.from_json(change_json), json.loads(prev_event_ids), event_id
+            ),
         )
 
     @classmethod

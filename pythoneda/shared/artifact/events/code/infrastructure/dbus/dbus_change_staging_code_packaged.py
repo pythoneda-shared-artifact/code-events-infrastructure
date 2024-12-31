@@ -22,7 +22,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 from dbus_next import Message
 from dbus_next.service import signal
 import json
-from pythoneda.shared import Event
+from pythoneda.shared import Event, Invariants
 from pythoneda.shared.infrastructure.dbus import DbusEvent
 from pythoneda.shared.artifact.events.code import ChangeStagingCodePackaged
 from pythoneda.shared.artifact.events.code.infrastructure.dbus import DBUS_PATH
@@ -47,9 +47,17 @@ class DbusChangeStagingCodePackaged(DbusEvent):
         """
         Creates a new DbusChangeStagingCodePackaged.
         """
-        super().__init__(
-            "Pythoneda_Shared_Artifact_Events_Code_ChangeStagingCodePackaged"
-        )
+        super().__init__(DBUS_PATH)
+
+    @classmethod
+    @property
+    def name(cls) -> str:
+        """
+        Retrieves the d-bus interface name.
+        :return: Such value.
+        :rtype: str
+        """
+        return "Pythoneda_Shared_Artifact_Events_Code_ChangeStagingCodePackaged"
 
     @signal()
     def ChangeStagingCodePackaged(self, nixFlake: "s"):
@@ -59,15 +67,6 @@ class DbusChangeStagingCodePackaged(DbusEvent):
         :type nixFlake: str
         """
         pass
-
-    @classmethod
-    def path(cls) -> str:
-        """
-        Retrieves the d-bus path.
-        :return: Such value.
-        :rtype: str
-        """
-        return DBUS_PATH
 
     @classmethod
     def transform(cls, event: ChangeStagingCodePackaged) -> List[str]:
@@ -81,6 +80,7 @@ class DbusChangeStagingCodePackaged(DbusEvent):
         return [
             event.nix_flake.to_json(),
             json.dumps(event.previous_event_ids),
+            Invariants.instance().to_json(event),
             event.id,
         ]
 
@@ -93,7 +93,7 @@ class DbusChangeStagingCodePackaged(DbusEvent):
         :return: The signature.
         :rtype: str
         """
-        return "sss"
+        return "ssss"
 
     @classmethod
     def parse(cls, message: Message) -> ChangeStagingCodePackaged:
@@ -104,11 +104,14 @@ class DbusChangeStagingCodePackaged(DbusEvent):
         :return: The ChangeStagingPackaged event.
         :rtype: pythoneda.shared.artifact.events.code.ChangeStagingCodePackaged
         """
-        nix_flake_json, prev_event_ids, event_id = message.body
-        return ChangeStagingCodePackaged(
-            JupyterlabCodeRequestNixFlake.from_json(nix_flake_json),
-            json.loads(prev_event_ids),
-            event_id,
+        nix_flake_json, prev_event_ids, invariants, event_id = message.body
+        return (
+            invariants,
+            ChangeStagingCodePackaged(
+                JupyterlabCodeRequestNixFlake.from_json(nix_flake_json),
+                json.loads(prev_event_ids),
+                event_id,
+            ),
         )
 
     @classmethod

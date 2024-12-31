@@ -22,7 +22,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 from dbus_next import Message
 from dbus_next.service import signal
 import json
-from pythoneda.shared import Event
+from pythoneda.shared import Event, Invariants
 from pythoneda.shared.infrastructure.dbus import DbusEvent
 from pythoneda.shared.artifact.events.code import ChangeStagingCodeExecutionPackaged
 from pythoneda.shared.artifact.events.code.infrastructure.dbus import DBUS_PATH
@@ -47,7 +47,17 @@ class DbusChangeStagingCodeExecutionPackaged(DbusEvent):
         """
         Creates a new DbusChangeStagingCodeExecutionPackaged.
         """
-        super().__init__(
+        super().__init__(DBUS_PATH)
+
+    @classmethod
+    @property
+    def name(cls) -> str:
+        """
+        Retrieves the d-bus interface name.
+        :return: Such value.
+        :rtype: str
+        """
+        return (
             "Pythoneda_Shared_Artifact_Events_Code_ChangeStagingCodeExecutionPackaged"
         )
 
@@ -61,15 +71,6 @@ class DbusChangeStagingCodeExecutionPackaged(DbusEvent):
         pass
 
     @classmethod
-    def path(cls) -> str:
-        """
-        Retrieves the d-bus path.
-        :return: Such value.
-        :rtype: str
-        """
-        return DBUS_PATH
-
-    @classmethod
     def transform(cls, event: ChangeStagingCodeExecutionPackaged) -> List[str]:
         """
         Transforms given event to signal parameters.
@@ -81,6 +82,7 @@ class DbusChangeStagingCodeExecutionPackaged(DbusEvent):
         return [
             event.nix_flake.to_json(),
             json.dumps(event.previous_event_ids),
+            Invariants.instance().to_json(event),
             event.id,
         ]
 
@@ -93,7 +95,7 @@ class DbusChangeStagingCodeExecutionPackaged(DbusEvent):
         :return: The signature.
         :rtype: str
         """
-        return "sss"
+        return "ssss"
 
     @classmethod
     def parse(cls, message: Message) -> ChangeStagingCodeExecutionPackaged:
@@ -104,11 +106,14 @@ class DbusChangeStagingCodeExecutionPackaged(DbusEvent):
         :return: The ChangeStagingExecutionPackaged event.
         :rtype: pythoneda.shared.artifact.events.code.ChangeStagingCodeExecutionPackaged
         """
-        nix_flake_json, prev_event_ids, event_id = message.body
-        return ChangeStagingCodeExecutionPackaged(
-            JupyterlabCodeRequestNixFlake.from_json(nix_flake_json),
-            json.loads(prev_event_ids),
-            event_id,
+        nix_flake_json, prev_event_ids, invariants, event_id = message.body
+        return (
+            invariants,
+            ChangeStagingCodeExecutionPackaged(
+                JupyterlabCodeRequestNixFlake.from_json(nix_flake_json),
+                json.loads(prev_event_ids),
+                event_id,
+            ),
         )
 
     @classmethod

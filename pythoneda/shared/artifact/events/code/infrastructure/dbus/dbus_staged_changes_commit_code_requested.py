@@ -22,7 +22,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 from dbus_next import Message
 from dbus_next.service import signal
 import json
-from pythoneda.shared import Event
+from pythoneda.shared import Event, Invariants
 from pythoneda.shared.infrastructure.dbus import DbusEvent
 from pythoneda.shared.artifact.events.code import StagedChangesCommitCodeRequested
 from pythoneda.shared.artifact.events.code.infrastructure.dbus import DBUS_PATH
@@ -46,9 +46,17 @@ class DbusStagedChangesCommitCodeRequested(DbusEvent):
         """
         Creates a new DbusStagedChangesCommitCodeRequested.
         """
-        super().__init__(
-            "Pythoneda_Shared_Artifact_Events_Code_StagedChangesCommitCodeRequested"
-        )
+        super().__init__(DBUS_PATH)
+
+    @classmethod
+    @property
+    def name(cls) -> str:
+        """
+        Retrieves the d-bus interface name.
+        :return: Such value.
+        :rtype: str
+        """
+        return "Pythoneda_Shared_Artifact_Events_Code_StagedChangesCommitCodeRequested"
 
     @signal()
     def StagedChangesCommitCodeRequested(self, change: "s"):
@@ -58,15 +66,6 @@ class DbusStagedChangesCommitCodeRequested(DbusEvent):
         :type change: str
         """
         pass
-
-    @classmethod
-    def path(cls) -> str:
-        """
-        Retrieves the d-bus path.
-        :return: Such value.
-        :rtype: str
-        """
-        return DBUS_PATH
 
     @classmethod
     def transform(cls, event: StagedChangesCommitCodeRequested) -> List[str]:
@@ -83,6 +82,7 @@ class DbusStagedChangesCommitCodeRequested(DbusEvent):
             event.branch,
             event.repository_folder,
             json.dumps(event.previous_event_ids),
+            Invariants.instance().to_json(event),
             event.id,
         ]
 
@@ -95,7 +95,7 @@ class DbusStagedChangesCommitCodeRequested(DbusEvent):
         :return: The signature.
         :rtype: str
         """
-        return "ssssss"
+        return "sssssss"
 
     @classmethod
     def parse(cls, message: Message) -> StagedChangesCommitCodeRequested:
@@ -112,15 +112,19 @@ class DbusStagedChangesCommitCodeRequested(DbusEvent):
             branch,
             repository_folder,
             prev_event_ids,
+            invariants,
             event_id,
         ) = message.body
-        return StagedChangesCommitCodeRequested(
-            msg,
-            repository_url,
-            branch,
-            repository_folder,
-            json.loads(prev_event_ids),
-            event_id,
+        return (
+            invariants,
+            StagedChangesCommitCodeRequested(
+                msg,
+                repository_url,
+                branch,
+                repository_folder,
+                json.loads(prev_event_ids),
+                event_id,
+            ),
         )
 
     @classmethod

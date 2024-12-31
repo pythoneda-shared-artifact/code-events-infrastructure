@@ -22,7 +22,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 from dbus_next import Message
 from dbus_next.service import signal
 import json
-from pythoneda.shared import Event
+from pythoneda.shared import Event, Invariants
 from pythoneda.shared.infrastructure.dbus import DbusEvent
 from pythoneda.shared.code_requests.jupyterlab import JupyterlabCodeRequest
 from pythoneda.shared.artifact.events.code import ChangeStagingCodeExecutionRequested
@@ -47,7 +47,17 @@ class DbusChangeStagingCodeExecutionRequested(DbusEvent):
         """
         Creates a new DbusChangeStagingCodeExecutionRequested.
         """
-        super().__init__(
+        super().__init__(DBUS_PATH)
+
+    @classmethod
+    @property
+    def name(cls) -> str:
+        """
+        Retrieves the d-bus interface name.
+        :return: Such value.
+        :rtype: str
+        """
+        return (
             "Pythoneda_Shared_Artifact_Events_Code_ChangeStagingCodeExecutionRequested"
         )
 
@@ -61,15 +71,6 @@ class DbusChangeStagingCodeExecutionRequested(DbusEvent):
         pass
 
     @classmethod
-    def path(cls) -> str:
-        """
-        Retrieves the d-bus path.
-        :return: Such value.
-        :rtype: str
-        """
-        return DBUS_PATH
-
-    @classmethod
     def transform(cls, event: ChangeStagingCodeExecutionRequested) -> List[str]:
         """
         Transforms given event to signal parameters.
@@ -81,6 +82,7 @@ class DbusChangeStagingCodeExecutionRequested(DbusEvent):
         return [
             event.code_request.to_json(),
             json.dumps(event.previous_event_ids),
+            Invariants.instance().to_json(event),
             event.id,
         ]
 
@@ -93,7 +95,7 @@ class DbusChangeStagingCodeExecutionRequested(DbusEvent):
         :return: The signature.
         :rtype: str
         """
-        return "sss"
+        return "ssss"
 
     @classmethod
     def parse(cls, message: Message) -> ChangeStagingCodeExecutionRequested:
@@ -104,11 +106,14 @@ class DbusChangeStagingCodeExecutionRequested(DbusEvent):
         :return: The ChangeStagingExecutionRequested event.
         :rtype: pythoneda.shared.artifact.events.code.ChangeStagingCodeExecutionRequested
         """
-        code_request_json, prev_event_ids, event_id = message.body
-        return ChangeStagingCodeExecutionRequested(
-            JupyterlabCodeRequest.from_json(code_request_json),
-            json.loads(prev_event_ids),
-            event_id,
+        code_request_json, prev_event_ids, invariants, event_id = message.body
+        return (
+            invariants,
+            ChangeStagingCodeExecutionRequested(
+                JupyterlabCodeRequest.from_json(code_request_json),
+                json.loads(prev_event_ids),
+                event_id,
+            ),
         )
 
     @classmethod

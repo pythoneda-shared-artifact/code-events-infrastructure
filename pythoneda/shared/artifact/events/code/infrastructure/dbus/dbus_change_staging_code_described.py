@@ -22,7 +22,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 from dbus_next import Message
 from dbus_next.service import signal
 import json
-from pythoneda.shared import Event
+from pythoneda.shared import Event, Invariants
 from pythoneda.shared.infrastructure.dbus import DbusEvent
 from pythoneda.shared.artifact.events.code import ChangeStagingCodeDescribed
 from pythoneda.shared.artifact.events.code.infrastructure.dbus import DBUS_PATH
@@ -47,9 +47,17 @@ class DbusChangeStagingCodeDescribed(DbusEvent):
         """
         Creates a new DbusChangeStagingCodeDescribed.
         """
-        super().__init__(
-            "Pythoneda_Shared_Artifact_Events_Code_ChangeStagingCodeDescribed"
-        )
+        super().__init__(DBUS_PATH)
+
+    @classmethod
+    @property
+    def name(cls) -> str:
+        """
+        Retrieves the d-bus interface name.
+        :return: Such value.
+        :rtype: str
+        """
+        return "Pythoneda_Shared_Artifact_Events_Code_ChangeStagingCodeDescribed"
 
     @signal()
     def ChangeStagingCodeDescribed(self, change: "s"):
@@ -59,15 +67,6 @@ class DbusChangeStagingCodeDescribed(DbusEvent):
         :type change: str
         """
         pass
-
-    @classmethod
-    def path(cls) -> str:
-        """
-        Retrieves the d-bus path.
-        :return: Such value.
-        :rtype: str
-        """
-        return DBUS_PATH
 
     @classmethod
     def transform(cls, event: ChangeStagingCodeDescribed) -> List[str]:
@@ -81,6 +80,7 @@ class DbusChangeStagingCodeDescribed(DbusEvent):
         return [
             event.code_request.to_json(),
             json.dumps(event.previous_event_ids),
+            Invariants.instance().to_json(event),
             event.id,
         ]
 
@@ -93,7 +93,7 @@ class DbusChangeStagingCodeDescribed(DbusEvent):
         :return: The signature.
         :rtype: str
         """
-        return "sss"
+        return "ssss"
 
     @classmethod
     def parse(cls, message: Message) -> ChangeStagingCodeDescribed:
@@ -104,11 +104,14 @@ class DbusChangeStagingCodeDescribed(DbusEvent):
         :return: The ChangeStagingDescribed event.
         :rtype: pythoneda.shared.artifact.events.code.ChangeStagingCodeDescribed
         """
-        code_request_json, prev_event_ids, event_id = message.body
-        return ChangeStagingCodeDescribed(
-            JupyterlabCodeRequest.from_json(code_request_json),
-            json.loads(prev_event_ids),
-            event_id,
+        code_request_json, prev_event_ids, invariants, event_id = message.body
+        return (
+            invariants,
+            ChangeStagingCodeDescribed(
+                JupyterlabCodeRequest.from_json(code_request_json),
+                json.loads(prev_event_ids),
+                event_id,
+            ),
         )
 
     @classmethod
